@@ -324,3 +324,22 @@ void Console::log(T arg, Args... args) {
 Console console = Console();
 
 /* End of CONSOLE Object */
+
+TSNumber factorial(TSNumber x) {
+if (x == TSNumber(1)) {
+return TSNumber(1);
+
+}
+return x * factorial(x - TSNumber(1));
+
+}
+
+
+int main(int argc, char** argv) {
+TSNumber x = TSNumber(5);
+x++;
+x--;
+console.log(factorial(x));
+
+  return 0;
+}

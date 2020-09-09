@@ -1,0 +1,2 @@
+language = "deno"
+run = "deno run --allow-all index.ts run tests/index.ts"

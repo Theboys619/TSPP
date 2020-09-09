@@ -172,6 +172,18 @@ export class Transpiler {
         this.code += `${exp.value}${(addition) ? addition : ""}`;
         break;
 
+      case "Increment":
+        if (addition)
+          this.transpile(exp.value, "++" + addition);
+        else
+          this.transpile(exp.value, "++;\n");
+        break;
+
+      case "Decrement":
+        this.transpile(exp.value);
+        this.code += "--;\n";
+        break;
+
       case "Function":
         this.createFunction(exp);
         break;

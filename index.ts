@@ -3,7 +3,7 @@ import * as Path from "https://deno.land/std@0.65.0/path/mod.ts";
 import { Parser } from "./src/parser.ts";
 import { Transpiler } from "./src/transpiler.ts";
 
-const __dirname = Path.dirname(new URL(import.meta.url).pathname).substring(1);
+const __dirname = (Deno.build.os == "windows") ? Path.dirname(new URL(import.meta.url).pathname).substring(1) : Path.dirname(new URL(import.meta.url).pathname);
 const decoder = new TextDecoder("utf8");
 const encoder = new TextEncoder();
 let argc = Deno.args.length;
@@ -27,9 +27,11 @@ async function runFile(filePath: string) {
 
   const transpiler = new Transpiler(parser);
   const outFile = Path.join(wsPath, `${fileName}.cpp`);
-  const outBinary = Path.join(wsPath, fileName) + (Deno.build.os == "windows") ? ".exe" : "";
-  for await (const dirEntry of Deno.readDir(Path.join(__dirname, "/src/stdlibs"))) {
-    const path = Path.join(__dirname, "/src/stdlibs", dirEntry.name);
+  let outBinary = Path.join(wsPath, fileName);
+  outBinary = (Deno.build.os == "windows") ? outBinary + ".exe" : outBinary;
+  
+  for await (const dirEntry of Deno.readDir(Path.join(__dirname, "./src/stdlibs"))) {
+    const path = Path.join(__dirname, "/src/stdlibs", dirEntry.name);;
     await transpiler.defineLib(path);
   }
 
@@ -38,6 +40,8 @@ async function runFile(filePath: string) {
   await Deno.writeFile(outFile, encoder.encode(transpiler.code));
 
   // console.log("FILENAME:", fileName, "FILEPATH:", filePath, "WSPATH:", wsPath, "OUTFILE:", outFile);
+
+  console.log(outBinary);
 
   const process = Deno.run({
     stdout: "piped",
@@ -49,7 +53,7 @@ async function runFile(filePath: string) {
   const runner = Deno.run({
     stdout: "piped",
     stderr: "piped",
-    cmd: [Path.join(wsPath, fileName) + ".exe"]
+    cmd: [outBinary]
   });
 
   console.log("Running...\n" + decoder.decode(await runner.output()));
